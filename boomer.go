@@ -119,7 +119,7 @@ func (b *Boomer) EnableMemoryProfile(memoryProfileFile string, duration time.Dur
 }
 
 // Run accepts a slice of Task and connects to the locust master.
-func (b *Boomer) Run(tasks ...*Task) {
+func (b *Boomer) Run(safeMode bool, tasks ...*Task) {
 	if b.cpuProfileFile != "" {
 		err := StartCPUProfile(b.cpuProfileFile, b.cpuProfileDuration)
 		if err != nil {
@@ -136,6 +136,7 @@ func (b *Boomer) Run(tasks ...*Task) {
 	switch b.mode {
 	case DistributedMode:
 		b.slaveRunner = newSlaveRunner(b.masterHost, b.masterPort, tasks, b.rateLimiter)
+		b.slaveRunner.setSafeMode(safeMode)
 		b.slaveRunner.setLogger(b.logger)
 		b.logger.Println("new slave runner")
 		for _, o := range b.outputs {
@@ -144,6 +145,7 @@ func (b *Boomer) Run(tasks ...*Task) {
 		b.slaveRunner.run()
 	case StandaloneMode:
 		b.localRunner = newLocalRunner(tasks, b.rateLimiter, b.spawnCount, b.spawnRate)
+		b.localRunner.setSafeMode(safeMode)
 		b.localRunner.setLogger(b.logger)
 		b.logger.Println("new local runner")
 		for _, o := range b.outputs {
@@ -253,7 +255,7 @@ func runTasksForTest(tasks ...*Task) {
 
 // Run accepts a slice of Task and connects to a locust master.
 // It's a convenience function to use the defaultBoomer.
-func Run(tasks ...*Task) {
+func Run(safeMode bool, tasks ...*Task) {
 	if !flag.Parsed() {
 		flag.Parse()
 	}
@@ -275,7 +277,7 @@ func Run(tasks ...*Task) {
 	defaultBoomer.EnableMemoryProfile(memoryProfileFile, memoryProfileDuration)
 	defaultBoomer.EnableCPUProfile(cpuProfileFile, cpuProfileDuration)
 
-	defaultBoomer.Run(tasks...)
+	defaultBoomer.Run(safeMode, tasks...)
 
 	quitByMe := false
 	quitChan := make(chan bool)

@@ -31,14 +31,26 @@ func (o *HitOutput) OnStop() {
 
 var _ = Describe("Test runner", func() {
 
-	It("test saferun", func() {
+	It("test safe run", func() {
 		Expect(func() {
 			runner := &runner{}
 			runner.setLogger(log.Default())
-			runner.safeRun(func() {
+			runner.setSafeMode(true)
+			runner.run(func() {
 				panic("Runner will catch this panic")
 			})
 		}).Should(Not(Panic()))
+	})
+
+	It("test unsafe run", func() {
+		Expect(func() {
+			runner := &runner{}
+			runner.setLogger(log.Default())
+			runner.setSafeMode(false)
+			runner.run(func() {
+				panic("Runner will not catch this panic")
+			})
+		}).Should(Panic())
 	})
 
 	It("test output onStart", func() {

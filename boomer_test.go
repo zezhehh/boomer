@@ -84,7 +84,7 @@ var _ = Describe("Test Boomer", func() {
 			},
 		}
 
-		go b.Run(taskA)
+		go b.Run(true, taskA)
 		defer b.Quit()
 		defer os.Remove("cpu.pprof")
 		defer os.Remove("mem.pprof")
@@ -108,7 +108,7 @@ var _ = Describe("Test Boomer", func() {
 				runtime.Goexit()
 			},
 		}
-		b.Run(taskA)
+		b.Run(true, taskA)
 		defer b.Quit()
 
 		serverMessage := newGenericMessage("spawn", map[string]interface{}{
@@ -193,7 +193,7 @@ var _ = Describe("Test Boomer", func() {
 			},
 		}
 
-		go Run(taskA)
+		go Run(true, taskA)
 		time.Sleep(50 * time.Millisecond)
 		defer defaultBoomer.Quit()
 
